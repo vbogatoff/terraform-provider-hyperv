@@ -204,7 +204,7 @@ function Test-Uri {
     }
 }
 
-if (!(Test-Path -Path $vhd.Path)) {
+if (!(Test-Path -Path $vhd.Path) -and ($vhd.Path -match '.*\.vhd[xs]?$')) {
     $pathDirectory = [System.IO.Path]::GetDirectoryName($vhd.Path)
     $pathFilename = [System.IO.Path]::GetFileName($vhd.Path)
 
@@ -214,12 +214,11 @@ if (!(Test-Path -Path $vhd.Path)) {
 
     if ($sourceVm) {
         Export-VM -Name $sourceVm -Path $pathDirectory
-        $targetName = (split-path $vhd.Path -Leaf)
-        $targetName = $targetName.Substring(0,$targetName.LastIndexOf('.')).split('\')[-1]
-        Get-ChildItem -Path "$pathDirectory\$sourceVm\Virtual Hard Disks" |?{$_.BaseName.StartsWith($sourceVm)} | %{
-            $targetNamePath = "$($pathDirectory)\$($_.Name.Replace($sourceVm, $targetName))"
-            Move-Item $_.FullName $targetNamePath
-        }
+        $targetName = [System.IO.Path]::GetFileNameWithoutExtension($pathFilename)
+        $sourceName = Get-VM -Name $sourceVm | Get-VMHardDiskDrive -ControllerNumber $sourceDisk | Select -ExpandProperty 'path' | Split-Path -Leaf
+        $sourceExt = [System.IO.Path]::GetExtension($sourceName)
+        Move-Item "$pathDirectory\$sourceVm\Virtual Hard Disks\$sourceName" "$pathDirectory\$targetName$sourceExt"
+        $vhd.Path = "$pathDirectory\$targetName$sourceExt"
 
         Remove-Item "$pathDirectory\$sourceVm" -Force -Recurse
         Get-VHD -path $vhd.Path
