@@ -36,7 +36,7 @@ func (c *ClientConfig) GetVmIntegrationServices(ctx context.Context, vmName stri
 
 type enableVmIntegrationServiceArgs struct {
 	VmName string
-	Name   string
+	IntegrationServiceId   string
 }
 
 var enableVmIntegrationServiceTemplate = template.Must(template.New("EnableVmIntegrationService").Parse(`
@@ -76,7 +76,7 @@ func (c *ClientConfig) EnableVmIntegrationService(ctx context.Context, vmName st
 
 type disableVmIntegrationServiceArgs struct {
 	VmName string
-	Name   string
+	IntegrationServiceId   string
 }
 
 var disableVmIntegrationServiceTemplate = template.Must(template.New("DisableVmIntegrationService").Parse(`
