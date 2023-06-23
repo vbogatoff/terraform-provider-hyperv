@@ -42,8 +42,14 @@ type enableVmIntegrationServiceArgs struct {
 var enableVmIntegrationServiceTemplate = template.Must(template.New("EnableVmIntegrationService").Parse(`
 $ErrorActionPreference = 'Stop'
 
-integrationServiceId := ""
-	switch '{{.Name}}' {
+Get-VMIntegrationService -VmName '{{.VmName}}' | ?{$_.Id -match '{{.IntegrationServiceId}}' | Enable-VMIntegrationService
+
+`))
+
+func (c *ClientConfig) EnableVmIntegrationService(ctx context.Context, vmName string, name string) (err error) {
+
+	integrationServiceId := ""
+	switch name {
 	case "Time Synchronization":
 		integrationServiceId = "2497F4DE-E9FA-4204-80E4-4B75C46419C0"
 	case "Heartbeat":
@@ -58,15 +64,11 @@ integrationServiceId := ""
 		integrationServiceId = "6C09BB55-D683-4DA0-8931-C9BF705F6480"
 	default:
 		panic("unrecognized Integration Service Name")
+	}
 
-Get-VMIntegrationService -VmName '{{.VmName}}' | ?{$_.Id -match $integrationServiceId} | Enable-VMIntegrationService
-
-`))
-
-func (c *ClientConfig) EnableVmIntegrationService(ctx context.Context, vmName string, name string) (err error) {
 	err = c.WinRmClient.RunFireAndForgetScript(ctx, enableVmIntegrationServiceTemplate, enableVmIntegrationServiceArgs{
 		VmName: vmName,
-		Name:   name,
+		IntegrationServiceId:   integrationServiceId,
 	})
 
 	return err
@@ -80,8 +82,14 @@ type disableVmIntegrationServiceArgs struct {
 var disableVmIntegrationServiceTemplate = template.Must(template.New("DisableVmIntegrationService").Parse(`
 $ErrorActionPreference = 'Stop'
 
-integrationServiceId := ""
-	switch '{{.Name}}' {
+Get-VMIntegrationService -VmName '{{.VmName}}' | ?{$_.Id -match '{{.IntegrationServiceId}}' | Disable-VMIntegrationService
+
+`))
+
+func (c *ClientConfig) DisableVmIntegrationService(ctx context.Context, vmName string, name string) (err error) {
+	
+	integrationServiceId := ""
+	switch name {
 	case "Time Synchronization":
 		integrationServiceId = "2497F4DE-E9FA-4204-80E4-4B75C46419C0"
 	case "Heartbeat":
@@ -96,15 +104,11 @@ integrationServiceId := ""
 		integrationServiceId = "6C09BB55-D683-4DA0-8931-C9BF705F6480"
 	default:
 		panic("unrecognized Integration Service Name")
+	}
 
-Get-VMIntegrationService -VmName '{{.VmName}}' | ?{$_.Id -match $integrationServiceId} | Disable-VMIntegrationService
-
-`))
-
-func (c *ClientConfig) DisableVmIntegrationService(ctx context.Context, vmName string, name string) (err error) {
 	err = c.WinRmClient.RunFireAndForgetScript(ctx, disableVmIntegrationServiceTemplate, disableVmIntegrationServiceArgs{
 		VmName: vmName,
-		Name:   name,
+		IntegrationServiceId:   integrationServiceId,
 	})
 
 	return err
