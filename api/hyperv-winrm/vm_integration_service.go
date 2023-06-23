@@ -42,7 +42,25 @@ type enableVmIntegrationServiceArgs struct {
 var enableVmIntegrationServiceTemplate = template.Must(template.New("EnableVmIntegrationService").Parse(`
 $ErrorActionPreference = 'Stop'
 
-Get-VM -Name '{{.VmName}}*' | ?{$_.Name -eq '{{.VmName}}' } | Enable-VMIntegrationService -Name '{{.Name}}'
+integrationServiceId := ""
+	switch '{{.Name}}' {
+	case "Time Synchronization":
+		integrationServiceId = "2497F4DE-E9FA-4204-80E4-4B75C46419C0"
+	case "Heartbeat":
+		integrationServiceId = "84EAAE65-2F2E-45F5-9BB5-0E857DC8EB47"
+	case "Key-Value Pair Exchange":
+		integrationServiceId = "2A34B1C2-FD73-4043-8A5B-DD2159BC743F"
+	case "Shutdown":
+		integrationServiceId = "9F8233AC-BE49-4C79-8EE3-E7E1985B2077"
+	case "VSS":
+		integrationServiceId = "5CED1297-4598-4915-A5FC-AD21BB4D02A4"
+	case "Guest Service Interface":
+		integrationServiceId = "6C09BB55-D683-4DA0-8931-C9BF705F6480"
+	default:
+		panic("unrecognized Integration Service Name")
+
+Get-VMIntegrationService -VmName '{{.VmName}}' | ?{$_.Id -match $integrationServiceId} | Enable-VMIntegrationService
+
 `))
 
 func (c *ClientConfig) EnableVmIntegrationService(ctx context.Context, vmName string, name string) (err error) {
@@ -62,7 +80,25 @@ type disableVmIntegrationServiceArgs struct {
 var disableVmIntegrationServiceTemplate = template.Must(template.New("DisableVmIntegrationService").Parse(`
 $ErrorActionPreference = 'Stop'
 
-Get-VM -Name '{{.VmName}}*' | ?{$_.Name -eq '{{.VmName}}' } | Disable-VMIntegrationService -Name '{{.Name}}'
+integrationServiceId := ""
+	switch '{{.Name}}' {
+	case "Time Synchronization":
+		integrationServiceId = "2497F4DE-E9FA-4204-80E4-4B75C46419C0"
+	case "Heartbeat":
+		integrationServiceId = "84EAAE65-2F2E-45F5-9BB5-0E857DC8EB47"
+	case "Key-Value Pair Exchange":
+		integrationServiceId = "2A34B1C2-FD73-4043-8A5B-DD2159BC743F"
+	case "Shutdown":
+		integrationServiceId = "9F8233AC-BE49-4C79-8EE3-E7E1985B2077"
+	case "VSS":
+		integrationServiceId = "5CED1297-4598-4915-A5FC-AD21BB4D02A4"
+	case "Guest Service Interface":
+		integrationServiceId = "6C09BB55-D683-4DA0-8931-C9BF705F6480"
+	default:
+		panic("unrecognized Integration Service Name")
+
+Get-VMIntegrationService -VmName '{{.VmName}}' | ?{$_.Id -match $integrationServiceId} | Disable-VMIntegrationService
+
 `))
 
 func (c *ClientConfig) DisableVmIntegrationService(ctx context.Context, vmName string, name string) (err error) {
